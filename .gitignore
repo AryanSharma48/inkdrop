@@ -1,0 +1,6 @@
+node_modules
+.agent*
+dist/
+.wrangler/
+*.d.ts
+*.map

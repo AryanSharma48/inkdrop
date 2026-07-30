@@ -1,0 +1,9 @@
+name = "ink-drop"
+compatibility_date = "2024-01-01"
+main = "./dist/index.js"          # compiled output location
+type = "javascript"
+
+[build]
+command = "npm run build"         # runs `tsc` → outputs to ./dist
+cwd = "."
+watch_dir = "./backend/src"
