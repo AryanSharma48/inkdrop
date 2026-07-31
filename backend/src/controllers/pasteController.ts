@@ -62,3 +62,14 @@ export async function getPasteData (c : Context) {
     
     return c.json(pastedContent);
 }
+
+export async function deletePasteData(c: Context) {
+    const id = c.req.param('id');
+    try {
+        await c.env.PASTE_KV.delete(id);
+        return c.json({ success: true});
+    } catch (error: unknown){
+        console.error("Error in deletion: ", error);
+        return c.text("Failed to delete data", 500);
+    }
+}
