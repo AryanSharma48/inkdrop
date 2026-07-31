@@ -1,0 +1,21 @@
+@import "tailwindcss";
+
+@theme {
+  --color-gov-yellow: #FFCC00;
+  --color-gov-red: #CC0000;
+  --color-gov-purple: #660099;
+  --color-gov-black: #000000;
+  --color-gov-white: #FFFFFF;
+}
+
+@layer base {
+  body {
+    @apply bg-gov-white text-gov-black antialiased;
+    margin: 0;
+  }
+
+  /* Force brutalist square look everywhere */
+  * {
+    border-radius: 0 !important;
+  }
+}
