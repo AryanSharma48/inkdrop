@@ -1,7 +1,12 @@
 name = "ink-drop"
 compatibility_date = "2024-01-01"
 main = "./dist/index.js"          # compiled output location
-type = "javascript"
+
+
+[[kv_namespaces]]
+binding = "PASTE_KV"
+id = "f362e0326b7a4c9cb92c82e56a8a3e28"
+preview_id = "ae619d2507df4ac5baa7097a11b98793"
 
 [build]
 command = "npm run build"         # runs `tsc` → outputs to ./dist
