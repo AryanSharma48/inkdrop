@@ -1,5 +1,8 @@
 export interface PasteType {
     id: string,
-    text: any,
+    title?: string | undefined,
+    language?: string | undefined,
+    visibility: string,
+    text: string,
     expiresAt?: number,    
 }

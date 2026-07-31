@@ -1,8 +1,9 @@
 import { z } from 'zod' 
 import { Context } from 'hono'
-import { createPasteSchema } from '../schemas/paste.js';
+import { createPasteSchema } from '../schemas/pasteSchema.js';
 import { randomUrl } from '../utils/id.js';
 import type { PasteType } from "../types/types.js";
+import { addToDB } from '../services/pasteService.js';
 
 export async function addPasteData (c : Context) {
     const id = randomUrl();
@@ -13,24 +14,25 @@ export async function addPasteData (c : Context) {
     if(!result.success){
         return c.json({error: z.flattenError(result.error).fieldErrors}, 400)
     }
-    const { text, expiresIn }  = result.data;
+    const { title, language, visibility, text, expiresIn }  = result.data;
     const pasteData : PasteType = {
         id: id,
+        title: title,
+        language: language, // if undefined, JSON.stringify will drop title and language
         text: text,
+        visibility: visibility,   
     }
     if(expiresIn){
         expiresAt = Date.now() + expiresIn * 1000;
         pasteData.expiresAt = expiresAt;
     }
-    
     try{
-        await c.env.PASTE_KV.put(id, JSON.stringify(pasteData));
+        await addToDB(c.env,id, pasteData);
 
     }catch (error) {
         console.error("KV Put failed:", error);  
         return c.text("Failed to save data", 500);
     }
-
     return c.json({ id: id, expiresAt: expiresAt ?? null }, 201);
 
 }

@@ -1,5 +1,5 @@
 import { Hono } from 'hono'
-import { pasteRouter } from './routes/paste.js';
+import { pasteRouter } from './routes/pasteRoute.js';
 
 const app = new Hono();
 
