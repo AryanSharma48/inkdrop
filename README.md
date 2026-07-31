@@ -1,5 +1,5 @@
 <h1 align="center">
-  <img src="./frontend/public/logo.png" alt="InkDrop Logo" width="50" align="center" /> InkDrop
+  <img src="./frontend/public/logo.png" alt="InkDrop Logo" width="30" style="vertical-align: middle;" /> InkDrop
 </h1>
 
 A modern, serverless Pastebin platform built for developers to create, store, and share text snippets using unique URLs.
@@ -58,6 +58,26 @@ The frontend is a strictly brutalist, "Government Website" themed React applicat
 - Syntax highlighting is handled cleanly on the client-side using `react-syntax-highlighter` mapping to the backend's saved language tokens.
 
 ## System Workflow 
+
+```mermaid
+graph TD
+    Client([Client / Browser])
+    
+    Frontend[React / Vite UI]
+    API[Hono API / CF Workers]
+    KV[(Cloudflare KV Cache)]
+    D1[(Cloudflare D1 SQL DB)]
+
+    Routes["<b>REST API</b><br/>POST /api/pastes<br/>GET /api/pastes/:id<br/>GET /api/raw/:id<br/>DELETE /api/pastes/:id"]
+    
+    Client --> Frontend
+    Frontend --> Routes
+    Routes --> API
+    
+    API <-->|1. Sub-10ms Cache Hit| KV
+    API <-->|2. DB Fallback / Write| D1
+    API -->|3. Populate Cache| KV
+```
 
 ### Creating a Paste
 1. User submits paste content via the Frontend.
