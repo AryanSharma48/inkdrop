@@ -3,7 +3,7 @@ import { Context } from 'hono'
 import { createPasteSchema } from '../schemas/pasteSchema.js';
 import { randomUrl } from '../utils/id.js';
 import type { PasteType } from "../types/types.js";
-import { addToDB } from '../services/pasteService.js';
+import { addToDB, deleteFromDB, getFromDB } from '../services/pasteService.js';
 
 export async function addPasteData (c : Context) {
     const id = randomUrl();
@@ -38,10 +38,10 @@ export async function addPasteData (c : Context) {
 }
 
 export async function getPasteData (c : Context) {
-    const pasteId = c.req.param('id');
+    const pasteId = c.req.param('id') as string;
     let pastedContent : any;
     try {
-        const paste = await c.env.PASTE_KV.get(pasteId);
+        const paste = await getFromDB(c.env, pasteId);
         if ( paste === null){
             return c.json({
                 error: "Key not found."
@@ -56,7 +56,7 @@ export async function getPasteData (c : Context) {
     } 
     
     if(pastedContent.expiresAt < Date.now()){
-        await c.env.PASTE_KV.delete(pasteId);
+        await deleteFromDB(c.env, pasteId);
         return c.json({
             error: "This paste had been expired."
         }, 410);
@@ -66,12 +66,25 @@ export async function getPasteData (c : Context) {
 }
 
 export async function deletePasteData(c: Context) {
-    const id = c.req.param('id');
+    const id = c.req.param('id') as string;
     try {
-        await c.env.PASTE_KV.delete(id);
+        await deleteFromDB(c.env, id);
         return c.json({ success: true});
     } catch (error: unknown){
         console.error("Error in deletion: ", error);
         return c.text("Failed to delete data", 500);
     }
+}
+
+export async function getRawPasteData(c: Context){
+    const id = c.req.param('id') as string;
+    const paste = await getFromDB(c.env, id);
+
+    if (!paste) {
+        return c.text("Paste not found", 404);
+    }
+
+    const text = JSON.parse(paste).text;
+
+    return c.text(text);
 }
