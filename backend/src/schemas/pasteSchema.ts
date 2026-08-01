@@ -5,5 +5,7 @@ export const createPasteSchema = z.object({
   visibility: z.enum(["public", "unlisted"]).default('public'),
   language: z.string().optional(),
   text: z.string().min(1, 'Text cannot be empty'),
+  isBurn: z.boolean().optional().default(false),
   expiresIn: z.number().int().positive().optional(),
+  password : z.string().optional(), 
 })

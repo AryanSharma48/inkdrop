@@ -3,14 +3,16 @@ import type { PasteType } from "../types/types.js";
 export async function addToDB(env: any, id: string, pasteData: PasteType) {
     try {
         await env.ink_drop_db.prepare(
-            `INSERT INTO pastes (id, title, language, visibility, text, expiresAt) VALUES (?, ?, ?, ?, ?, ?)`
+            `INSERT INTO pastes (id, title, language, visibility, text, isBurn, expiresAt, passwordHash) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
         ).bind(
             id, 
             pasteData.title ?? null,
             pasteData.language ?? null,
             pasteData.visibility,
             pasteData.text, 
-            pasteData.expiresAt ?? null
+            pasteData.isBurn ?? null,
+            pasteData.expiresAt ?? null,
+            pasteData.passwordHash ?? null,
         ).run();
 
         await env.PASTE_KV.put(id, JSON.stringify(pasteData));
@@ -38,6 +40,17 @@ export async function deleteFromDB(env: any, id: string){
         //Clear from cache in KV storage
         await env.PASTE_KV.delete(id);
     } catch (error: unknown){
+        throw error;
+    }
+}
+
+export async function getAllFromDB(env: any){
+    try{
+        const allData = await env.ink_drop_db.prepare(`SELECT id, language, isBurn, (passwordHash IS NOT NULL) as isProtected FROM pastes WHERE visibility = 'public' ORDER BY id DESC LIMIT 50`)
+        .all();
+        return allData;
+
+    } catch (error : unknown){
         throw error;
     }
 }

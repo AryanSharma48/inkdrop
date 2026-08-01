@@ -4,5 +4,7 @@ export interface PasteType {
     language?: string | undefined,
     visibility: string,
     text: string,
-    expiresAt?: number,    
+    isBurn?: boolean,
+    expiresAt?: number,
+    passwordHash?: string | null,
 }

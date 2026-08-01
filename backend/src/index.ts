@@ -4,7 +4,9 @@ import { pasteRouter } from './routes/pasteRoute.js';
 
 const app = new Hono();
 
-app.use('/api/*', cors());
+app.use('/api/*', cors({
+    origin : "https://inkdroppaste.vercel.app"
+}));
 
 app.route('/api', pasteRouter);
 

@@ -8,6 +8,7 @@ type PasteData = {
     text: string;
     language?: string;
     visibility: string;
+    isBurn?: boolean;
     expiresAt?: number;
 };
 
@@ -82,6 +83,11 @@ export default function ViewPaste() {
       <div className="flex justify-between items-end border-b-4 border-gov-black pb-2">
         <div>
           <h1 className="text-4xl font-black uppercase">PASTE: {id}</h1>
+          {paste.isBurn && (
+              <div className="bg-gov-red text-gov-white font-black uppercase px-2 py-1 mt-2 inline-block border-2 border-gov-black animate-pulse">
+                🔥 WARNING: THIS PASTE HAS BURNED AND NO LONGER EXISTS 🔥
+              </div>
+          )}
           <p className="text-gov-black font-bold uppercase mt-1">
               LANGUAGE: {paste.language || 'text'} | EXPIRES: {formatExpires(paste.expiresAt)}
           </p>
@@ -94,7 +100,7 @@ export default function ViewPaste() {
             Copy
           </button>
           <a 
-            href={`/api/raw/${id}`}
+            href={`${import.meta.env.VITE_API_URL}/api/raw/${id}`}
             target="_blank"
             rel="noreferrer"
             className="bg-gov-white text-gov-black font-bold px-4 py-2 uppercase border-2 border-gov-black hover:bg-gov-yellow"

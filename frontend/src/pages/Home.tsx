@@ -6,6 +6,7 @@ export default function Home() {
   const [language, setLanguage] = useState('text');
   const [visibility, setVisibility] = useState('public');
   const [expiration, setExpiration] = useState('never');
+  const [isBurn, setIsBurn] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -30,6 +31,7 @@ export default function Home() {
           text: content,
           language,
           visibility,
+          isBurn,
           expiresIn
         })
       });
@@ -67,7 +69,7 @@ export default function Home() {
         />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="flex flex-col border-4 border-gov-black">
           <label className="font-bold uppercase bg-gov-black text-gov-white px-2 py-1 text-sm">Language</label>
           <select 
@@ -112,6 +114,19 @@ export default function Home() {
             <option value="1d">1 Day</option>
             <option value="1w">1 Week</option>
           </select>
+        </div>
+
+        <div className="flex flex-col border-4 border-gov-black">
+          <label className="font-bold uppercase bg-gov-black text-gov-white px-2 py-1 text-sm">Burn On Read</label>
+          <div className="flex items-center justify-center h-full bg-gov-white p-2">
+            <input 
+              type="checkbox" 
+              checked={isBurn}
+              onChange={(e) => setIsBurn(e.target.checked)}
+              className="w-6 h-6 cursor-pointer accent-gov-red"
+              disabled={isSubmitting}
+            />
+          </div>
         </div>
       </div>
 
