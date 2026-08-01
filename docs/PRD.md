@@ -446,7 +446,7 @@ Reduce database reads.
 
 Frontend
 
-Cloudflare Pages
+Vercel
 
 Backend
 

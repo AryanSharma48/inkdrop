@@ -22,7 +22,7 @@ export default function ViewPaste() {
   useEffect(() => {
     const fetchPaste = async () => {
         try {
-            const response = await fetch(`/api/pastes/${id}`);
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/pastes/${id}`);
             if (!response.ok) {
                 if (response.status === 404) throw new Error("Paste not found.");
                 if (response.status === 410) throw new Error("This paste has expired.");
@@ -44,7 +44,7 @@ export default function ViewPaste() {
     
     setIsDeleting(true);
     try {
-        const response = await fetch(`/api/pastes/${id}`, {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/pastes/${id}`, {
             method: 'DELETE'
         });
         if (!response.ok) {
