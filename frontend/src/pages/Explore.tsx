@@ -39,7 +39,13 @@ export default function Explore() {
     const formatExpires = (timestamp?: number | null) => {
         if (!timestamp) return 'NEVER EXPIRES';
         if (timestamp < Date.now()) return 'EXPIRED';
-        return `EXPIRES: ${new Date(timestamp).toLocaleString()}`;
+        const d = new Date(timestamp);
+        const dd = String(d.getDate()).padStart(2, '0');
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const yyyy = d.getFullYear();
+        const hh = String(d.getHours()).padStart(2, '0');
+        const min = String(d.getMinutes()).padStart(2, '0');
+        return `EXPIRES: ${dd}/${mm}/${yyyy} ${hh}:${min}`;
     };
 
     return (

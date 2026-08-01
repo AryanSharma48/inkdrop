@@ -5,6 +5,7 @@ import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 type PasteData = {
     id: string;
+    title?: string | null;
     text: string;
     language?: string;
     visibility: string;
@@ -112,14 +113,21 @@ export default function ViewPaste() {
 
   const formatExpires = (timestamp?: number) => {
       if (!timestamp) return 'NEVER';
-      return new Date(timestamp).toLocaleString();
+      const d = new Date(timestamp);
+      const dd = String(d.getDate()).padStart(2, '0');
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const yyyy = d.getFullYear();
+      const hh = String(d.getHours()).padStart(2, '0');
+      const min = String(d.getMinutes()).padStart(2, '0');
   };
 
   return (
     <div className="flex flex-col gap-4">
       <div className="flex justify-between items-end border-b-4 border-gov-black pb-2">
         <div>
-          <h1 className="text-4xl font-black uppercase">PASTE: {id}</h1>
+          <h1 className="text-4xl font-black uppercase truncate max-w-full">
+            {paste.title ? paste.title : `PASTE: ${id}`}
+          </h1>
           {paste.isBurn && (
               <div className="bg-gov-red text-gov-white font-black uppercase px-2 py-1 mt-2 inline-block border-2 border-gov-black animate-pulse">
                 🔥 WARNING: THIS PASTE HAS BURNED AND NO LONGER EXISTS 🔥

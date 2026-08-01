@@ -46,7 +46,7 @@ export default function Home() {
       }
 
       const data = await response.json();
-      navigate(`/p/${data.id}`);
+      navigate('/explore');
     } catch (err: any) {
       setError(err.message || 'An unknown error occurred');
       setIsSubmitting(false);

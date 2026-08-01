@@ -17,6 +17,7 @@ function App() {
               </span>
             </Link>
             <div className="flex items-center gap-6">
+              <Link to="/" className="text-gov-black font-black uppercase text-xl hover:underline decoration-4 underline-offset-4">CREATE NEW</Link>
               <Link to="/explore" className="text-gov-black font-black uppercase text-xl hover:underline decoration-4 underline-offset-4">EXPLORE</Link>
               <div className="text-gov-black font-bold uppercase text-sm border-2 border-gov-black px-2 py-1 bg-gov-white">
                 Official Platform
