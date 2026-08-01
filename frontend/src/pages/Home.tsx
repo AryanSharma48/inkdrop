@@ -7,6 +7,8 @@ export default function Home() {
   const [visibility, setVisibility] = useState('public');
   const [expiration, setExpiration] = useState('never');
   const [isBurn, setIsBurn] = useState(false);
+  const [password, setPassword] = useState('');
+  const [title, setTitle] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -29,9 +31,11 @@ export default function Home() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           text: content,
+          title: title || undefined,
           language,
           visibility,
           isBurn,
+          password: password || undefined,
           expiresIn
         })
       });
@@ -58,6 +62,14 @@ export default function Home() {
             </label>
             {error && <span className="text-gov-red font-bold uppercase text-sm">Error: {error}</span>}
         </div>
+        <input 
+          type="text"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="PASTE TITLE (OPTIONAL)"
+          className="w-full border-4 border-gov-black bg-gov-white text-gov-black p-4 font-black uppercase text-2xl focus:outline-none placeholder:text-gray-400"
+          disabled={isSubmitting}
+        />
         <textarea
           id="paste-content"
           value={content}
@@ -69,7 +81,7 @@ export default function Home() {
         />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         <div className="flex flex-col border-4 border-gov-black">
           <label className="font-bold uppercase bg-gov-black text-gov-white px-2 py-1 text-sm">Language</label>
           <select 
@@ -127,6 +139,18 @@ export default function Home() {
               disabled={isSubmitting}
             />
           </div>
+        </div>
+
+        <div className="flex flex-col border-4 border-gov-black">
+          <label className="font-bold uppercase bg-gov-black text-gov-white px-2 py-1 text-sm">Password</label>
+          <input 
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="OPTIONAL"
+            className="p-2 font-bold uppercase bg-gov-white text-gov-black focus:outline-none placeholder:text-gray-400 placeholder:text-xs h-full"
+            disabled={isSubmitting}
+          />
         </div>
       </div>
 

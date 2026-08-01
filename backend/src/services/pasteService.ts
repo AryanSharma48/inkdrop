@@ -46,7 +46,7 @@ export async function deleteFromDB(env: any, id: string){
 
 export async function getAllFromDB(env: any){
     try{
-        const allData = await env.ink_drop_db.prepare(`SELECT id, language, isBurn, (passwordHash IS NOT NULL) as isProtected FROM pastes WHERE visibility = 'public' ORDER BY id DESC LIMIT 50`)
+        const allData = await env.ink_drop_db.prepare(`SELECT id, title, language, isBurn, expiresAt, (passwordHash IS NOT NULL) as isProtected FROM pastes WHERE visibility = 'public' ORDER BY id DESC LIMIT 50`)
         .all();
         return allData;
 

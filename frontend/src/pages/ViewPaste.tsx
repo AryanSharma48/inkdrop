@@ -19,24 +19,39 @@ export default function ViewPaste() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isLocked, setIsLocked] = useState(false);
+  const [password, setPassword] = useState('');
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+
+  const fetchPaste = async (pass?: string) => {
+      try {
+          setLoading(true);
+          const headers: HeadersInit = {};
+          if (pass) headers['x-paste-password'] = pass;
+
+          const response = await fetch(`${import.meta.env.VITE_API_URL}/api/pastes/${id}`, { headers });
+          if (!response.ok) {
+              if (response.status === 404) throw new Error("Paste not found.");
+              if (response.status === 410) throw new Error("This paste has expired.");
+              if (response.status === 401) {
+                  if (pass) setPasswordError("INCORRECT PASSWORD");
+                  setIsLocked(true);
+                  return;
+              }
+              throw new Error("Failed to load paste.");
+          }
+          const data = await response.json();
+          setPaste(data);
+          setIsLocked(false);
+          setPasswordError(null);
+      } catch (err: any) {
+          setError(err.message);
+      } finally {
+          setLoading(false);
+      }
+  };
 
   useEffect(() => {
-    const fetchPaste = async () => {
-        try {
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/pastes/${id}`);
-            if (!response.ok) {
-                if (response.status === 404) throw new Error("Paste not found.");
-                if (response.status === 410) throw new Error("This paste has expired.");
-                throw new Error("Failed to load paste.");
-            }
-            const data = await response.json();
-            setPaste(data);
-        } catch (err: any) {
-            setError(err.message);
-        } finally {
-            setLoading(false);
-        }
-    };
     fetchPaste();
   }, [id]);
 
@@ -59,7 +74,29 @@ export default function ViewPaste() {
   };
 
   if (loading) {
-      return <div className="text-2xl font-black uppercase text-center mt-20">LOADING...</div>;
+      return <div className="text-2xl font-black uppercase text-center mt-20 animate-pulse">LOADING...</div>;
+  }
+
+  if (isLocked && !paste) {
+      return (
+          <div className="flex flex-col gap-4 max-w-md mx-auto mt-20 p-8 border-4 border-gov-black bg-gov-yellow shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+              <h1 className="text-4xl font-black uppercase text-center mb-4">🔒 LOCKED</h1>
+              {passwordError && <div className="bg-gov-red text-gov-white font-black uppercase text-center p-2 border-2 border-gov-black">{passwordError}</div>}
+              <form onSubmit={(e) => { e.preventDefault(); fetchPaste(password); }} className="flex flex-col gap-4">
+                  <input 
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="ENTER PASSWORD..."
+                      className="border-4 border-gov-black p-4 font-bold uppercase focus:outline-none"
+                      required
+                  />
+                  <button type="submit" className="bg-gov-black text-gov-white font-black uppercase py-4 border-4 border-gov-black hover:bg-gov-white hover:text-gov-black transition-colors cursor-pointer">
+                      Unlock
+                  </button>
+              </form>
+          </div>
+      );
   }
 
   if (error || !paste) {

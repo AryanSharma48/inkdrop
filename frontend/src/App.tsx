@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 import Home from './pages/Home';
 import ViewPaste from './pages/ViewPaste';
+import Explore from './pages/Explore';
 
 function App() {
   return (
@@ -15,8 +16,11 @@ function App() {
                 INKDROP
               </span>
             </Link>
-            <div className="text-gov-black font-bold uppercase text-sm border-2 border-gov-black px-2 py-1 bg-gov-white">
-              Official Platform
+            <div className="flex items-center gap-6">
+              <Link to="/explore" className="text-gov-black font-black uppercase text-xl hover:underline decoration-4 underline-offset-4">EXPLORE</Link>
+              <div className="text-gov-black font-bold uppercase text-sm border-2 border-gov-black px-2 py-1 bg-gov-white">
+                Official Platform
+              </div>
             </div>
           </div>
         </header>
@@ -25,6 +29,7 @@ function App() {
         <main className="flex-1 max-w-4xl w-full mx-auto p-4 flex flex-col">
           <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/explore" element={<Explore />} />
             <Route path="/p/:id" element={<ViewPaste />} />
           </Routes>
         </main>
