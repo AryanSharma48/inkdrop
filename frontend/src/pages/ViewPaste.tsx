@@ -125,23 +125,23 @@ export default function ViewPaste() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex justify-between items-end border-b-4 border-gov-black pb-2">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end border-b-4 border-gov-black pb-4 gap-4">
         <div>
-          <h1 className="text-4xl font-black uppercase truncate max-w-full">
+          <h1 className="text-3xl sm:text-4xl font-black uppercase truncate max-w-full">
             {paste.title ? paste.title : `PASTE: ${id}`}
           </h1>
           {paste.isBurn && (
-              <div className="bg-gov-red text-gov-white font-black uppercase px-2 py-1 mt-2 inline-block border-2 border-gov-black animate-pulse">
+              <div className="bg-gov-red text-gov-white font-black uppercase px-2 py-1 mt-2 inline-block border-2 border-gov-black animate-pulse text-xs sm:text-sm">
                 🔥 WARNING: THIS PASTE HAS BURNED AND NO LONGER EXISTS 🔥
               </div>
           )}
-          <p className="text-gov-black font-bold uppercase mt-1 text-sm">
-              CREATED BY: {paste.creatorName || 'ANONYMOUS'} | LANGUAGE: {paste.language || 'text'} | EXPIRES: {formatExpires(paste.expiresAt)}
+          <p className="text-gov-black font-bold uppercase mt-2 text-xs sm:text-sm leading-relaxed">
+              CREATED BY: {paste.creatorName || 'ANONYMOUS'} <br className="sm:hidden" />| LANGUAGE: {paste.language || 'text'} <br className="sm:hidden" />| EXPIRES: {formatExpires(paste.expiresAt)}
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2 w-full sm:w-auto">
           <button 
-            className="bg-gov-purple text-gov-white font-bold px-4 py-2 uppercase border-2 border-gov-black hover:bg-gov-black"
+            className="flex-1 sm:flex-initial bg-gov-purple text-gov-white font-bold px-4 py-2 uppercase border-2 border-gov-black hover:bg-gov-black text-center"
             onClick={() => navigator.clipboard.writeText(paste.text)}
           >
             Copy
@@ -150,14 +150,14 @@ export default function ViewPaste() {
             href={`${import.meta.env.VITE_API_URL}/api/raw/${id}`}
             target="_blank"
             rel="noreferrer"
-            className="bg-gov-white text-gov-black font-bold px-4 py-2 uppercase border-2 border-gov-black hover:bg-gov-yellow"
+            className="flex-1 sm:flex-initial bg-gov-white text-gov-black font-bold px-4 py-2 uppercase border-2 border-gov-black hover:bg-gov-yellow text-center"
           >
             Raw
           </a>
           <button 
             onClick={handleDelete}
             disabled={isDeleting}
-            className="bg-gov-red text-gov-white font-bold px-4 py-2 uppercase border-2 border-gov-black hover:bg-gov-black disabled:opacity-50"
+            className="flex-1 sm:flex-initial bg-gov-red text-gov-white font-bold px-4 py-2 uppercase border-2 border-gov-black hover:bg-gov-black disabled:opacity-50 text-center"
           >
             Delete
           </button>
