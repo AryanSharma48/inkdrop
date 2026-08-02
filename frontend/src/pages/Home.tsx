@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { getAuthHeaders } from '../utils/auth';
 
 export default function Home() {
   const [content, setContent] = useState('');
@@ -28,7 +29,10 @@ export default function Home() {
     try {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/pastes`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          ...getAuthHeaders()
+        },
         body: JSON.stringify({
           text: content,
           title: title || undefined,
@@ -45,7 +49,7 @@ export default function Home() {
         throw new Error(errData.error || 'Failed to create paste');
       }
 
-      const data = await response.json();
+      await response.json();
       navigate('/explore');
     } catch (err: any) {
       setError(err.message || 'An unknown error occurred');
