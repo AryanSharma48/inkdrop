@@ -3,9 +3,10 @@ import type { PasteType } from "../types/types.js";
 export async function addToDB(env: any, id: string, pasteData: PasteType) {
     try {
         await env.ink_drop_db.prepare(
-            `INSERT INTO pastes (id, title, language, visibility, text, isBurn, expiresAt, passwordHash) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+            `INSERT INTO pastes (id, userId, title, language, visibility, text, isBurn, expiresAt, passwordHash) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
         ).bind(
             id, 
+            pasteData.userId ?? null,
             pasteData.title ?? null,
             pasteData.language ?? null,
             pasteData.visibility,
@@ -25,7 +26,12 @@ export async function addToDB(env: any, id: string, pasteData: PasteType) {
 export async function getFromDB(env: any, id: string){
     let paste =  await env.PASTE_KV.get(id);
     if (!paste){
-        const d1_paste = await env.ink_drop_db.prepare(`SELECT * FROM pastes WHERE id = ?`).bind(id).first();
+        const d1_paste = await env.ink_drop_db.prepare(`
+            SELECT p.*, u.userName as creatorName 
+            FROM pastes p 
+            LEFT JOIN users u ON p.userId = u.id 
+            WHERE p.id = ?
+        `).bind(id).first();
         paste = JSON.stringify(d1_paste);
     }
     return paste;
@@ -46,11 +52,28 @@ export async function deleteFromDB(env: any, id: string){
 
 export async function getAllFromDB(env: any){
     try{
-        const allData = await env.ink_drop_db.prepare(`SELECT id, title, language, isBurn, expiresAt, (passwordHash IS NOT NULL) as isProtected FROM pastes WHERE visibility = 'public' ORDER BY id DESC LIMIT 50`)
-        .all();
+        const allData = await env.ink_drop_db.prepare(`
+            SELECT p.id, p.title, p.language, p.isBurn, p.expiresAt, (p.passwordHash IS NOT NULL) as isProtected, u.userName as creatorName 
+            FROM pastes p 
+            LEFT JOIN users u ON p.userId = u.id 
+            WHERE p.visibility = 'public' 
+            ORDER BY p.id DESC 
+            LIMIT 50
+        `).all();
         return allData;
 
     } catch (error : unknown){
+        throw error;
+    }
+}
+
+export async function getPastesByUserId(env: any, userId: string) {
+    try {
+        const pastes = await env.ink_drop_db.prepare(
+            `SELECT id, title, language, isBurn, expiresAt, (passwordHash IS NOT NULL) as isProtected FROM pastes WHERE userId = ? ORDER BY id DESC`
+        ).bind(userId).all();
+        return pastes;
+    } catch (error: unknown) {
         throw error;
     }
 }

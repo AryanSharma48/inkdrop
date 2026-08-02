@@ -3,7 +3,7 @@ import { Context } from 'hono'
 import { createPasteSchema } from '../schemas/pasteSchema.js';
 import { randomUrl } from '../utils/id.js';
 import type { PasteType } from "../types/types.js";
-import { addToDB, deleteFromDB, getFromDB, getAllFromDB } from '../services/pasteService.js';
+import { addToDB, deleteFromDB, getFromDB, getAllFromDB, getPastesByUserId } from '../services/pasteService.js';
 import { generateSHA256 } from '../utils/hash.js';
 
 export async function addPasteData (c : Context) {
@@ -16,9 +16,12 @@ export async function addPasteData (c : Context) {
     if(!result.success){
         return c.json({error: z.flattenError(result.error).fieldErrors}, 400)
     }
+    const payload = c.get('jwtPayload') as { sub: string; username?: string } | undefined;
     const { title, language, visibility, text, expiresIn, isBurn, password }  = result.data;
     const pasteData : PasteType = {
         id: id,
+        userId: payload?.sub ?? null,
+        creatorName: payload?.username ?? null,
         title: title,
         language: language, // if undefined, JSON.stringify will drop title and language
         text: text,
@@ -163,5 +166,25 @@ export async function getAllPastes(c: Context){
         const message = error instanceof Error ? error.message : 'Unknown error'
         console.error(`Failed to fetch data:`, message);
         return c.json({ error: 'Failed to fetch data from storage' }, 500)
+    }
+}
+
+export async function getMyPastes(c: Context) {
+    try {
+        const payload = c.get('jwtPayload') as { sub: string } | undefined;
+        if (!payload) {
+            return c.json({ error: 'Unauthorized' }, 401);
+        }
+        
+        const userId = payload.sub;
+        const pastes = await getPastesByUserId(c.env, userId);
+        return c.json({
+            pastes: pastes.results || []
+        }, 200);
+        
+    } catch(error : unknown){
+        const message = error instanceof Error ? error.message : 'Unknown error'
+        console.error(`Failed to fetch user pastes:`, message);
+        return c.json({ error: 'Failed to fetch pastes from storage' }, 500)
     }
 }
