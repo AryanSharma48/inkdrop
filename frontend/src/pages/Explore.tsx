@@ -8,6 +8,7 @@ type FeedPaste = {
     isBurn: boolean | number;
     isProtected: boolean | number;
     expiresAt?: number | null;
+    creatorName?: string | null;
 };
 
 export default function Explore() {
@@ -65,7 +66,7 @@ export default function Explore() {
                             to={`/p/${paste.id}`}
                             className="block border-4 border-gov-black p-4 hover:-translate-y-1 hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all bg-gov-white group"
                         >
-                            <div className="flex justify-between items-start mb-4">
+                            <div className="flex justify-between items-start mb-1">
                                 <h2 className="text-2xl font-black uppercase truncate max-w-[70%] group-hover:underline">
                                     {paste.title ? paste.title : `PASTE: ${paste.id}`}
                                 </h2>
@@ -73,6 +74,9 @@ export default function Explore() {
                                     {paste.isProtected ? <span className="text-2xl" title="Password Required">🔒</span> : null}
                                     {paste.isBurn ? <span className="text-2xl animate-pulse" title="Will burn on read">🔥</span> : null}
                                 </div>
+                            </div>
+                            <div className="text-xs font-bold uppercase text-gov-black/60 mb-4">
+                                CREATED BY: {paste.creatorName || 'ANONYMOUS'}
                             </div>
                             <div className="flex justify-between items-center text-sm font-bold uppercase">
                                 <span className="bg-gov-black text-gov-white px-2 py-1">{paste.language || 'text'}</span>

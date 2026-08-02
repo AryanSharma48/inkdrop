@@ -11,7 +11,7 @@
     "moduleResolution": "NodeNext",
     "target": "ES2020",
     "esModuleInterop": true,
-    "types": ["@cloudflare/workers-types"],
+    "types": ["@cloudflare/workers-types", "node"],
     // For nodejs:
     // "lib": ["esnext"],
     // "types": ["node"],

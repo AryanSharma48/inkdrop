@@ -11,6 +11,7 @@ type PasteData = {
     visibility: string;
     isBurn?: boolean;
     expiresAt?: number;
+    creatorName?: string | null;
 };
 
 export default function ViewPaste() {
@@ -119,6 +120,7 @@ export default function ViewPaste() {
       const yyyy = d.getFullYear();
       const hh = String(d.getHours()).padStart(2, '0');
       const min = String(d.getMinutes()).padStart(2, '0');
+      return `${dd}/${mm}/${yyyy} ${hh}:${min}`;
   };
 
   return (
@@ -133,8 +135,8 @@ export default function ViewPaste() {
                 🔥 WARNING: THIS PASTE HAS BURNED AND NO LONGER EXISTS 🔥
               </div>
           )}
-          <p className="text-gov-black font-bold uppercase mt-1">
-              LANGUAGE: {paste.language || 'text'} | EXPIRES: {formatExpires(paste.expiresAt)}
+          <p className="text-gov-black font-bold uppercase mt-1 text-sm">
+              CREATED BY: {paste.creatorName || 'ANONYMOUS'} | LANGUAGE: {paste.language || 'text'} | EXPIRES: {formatExpires(paste.expiresAt)}
           </p>
         </div>
         <div className="flex gap-2">
