@@ -1,6 +1,7 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { pasteRouter } from './routes/pasteRoute.js';
+import { authRouter } from './routes/authRoute.js';
 
 const app = new Hono();
 
@@ -9,5 +10,6 @@ app.use('/api/*', cors({
 }));
 
 app.route('/api', pasteRouter);
+app.route('/api/auth', authRouter);
 
 export default app;
