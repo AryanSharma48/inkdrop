@@ -20,7 +20,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (!getToken()) {
-      navigate('/');
+      setLoading(false);
       return;
     }
 
@@ -88,6 +88,32 @@ export default function Dashboard() {
 
   if (loading) return <div className="text-2xl font-black uppercase text-center mt-20 animate-pulse">LOADING YOUR DASHBOARD...</div>;
   if (error) return <div className="text-2xl font-black uppercase text-center mt-20 text-gov-red">ERROR: {error}</div>;
+  
+  if (!user) {
+    const handleLogin = () => {
+      const clientId = import.meta.env.VITE_GITHUB_CLIENT_ID;
+      const redirectUri = `${window.location.origin}/auth/callback`;
+      window.location.href = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=read:user`;
+    };
+
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center text-center p-8 border-4 border-gov-black bg-gov-yellow shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] my-12">
+        <h1 className="text-4xl font-black uppercase mb-4">ACCESS DENIED</h1>
+        <p className="text-gov-black font-bold uppercase mb-6 max-w-md">
+          Login with GitHub is required to view your persistent paste dashboard and manage your account files.
+        </p>
+        <button
+          onClick={handleLogin}
+          className="bg-gov-black text-gov-white font-black px-6 py-3 border-4 border-gov-black shadow-[4px_4px_0px_0px_rgba(255,255,255,1)] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0px_0px_rgba(255,255,255,1)] transition-all uppercase text-lg flex items-center gap-2"
+        >
+          <svg className="w-6 h-6 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2A10 10 0 0 0 2 12c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.9-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.07 2.91.83.1-.72.37-1.07.6-1.25-2.22-.25-4.55-1.11-4.55-4.94 0-1.1.39-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.65.71 1.03 1.6 1.03 2.71 0 3.84-2.34 4.68-4.57 4.93.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0 0 12 2z"/>
+          </svg>
+          LOGIN WITH GITHUB
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-6 w-full">

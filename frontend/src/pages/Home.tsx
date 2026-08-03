@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getAuthHeaders } from '../utils/auth';
+import { getAuthHeaders, getUser } from '../utils/auth';
 
 export default function Home() {
+  const user = getUser();
   const [content, setContent] = useState('');
   const [language, setLanguage] = useState('text');
   const [visibility, setVisibility] = useState('public');
@@ -49,7 +50,13 @@ export default function Home() {
         throw new Error(errData.error || 'Failed to create paste');
       }
 
-      await response.json();
+      const data = await response.json() as { id: string };
+      if (!getUser()) {
+        const guestPastes = JSON.parse(localStorage.getItem('guest_pastes') || '[]');
+        guestPastes.push(data.id);
+        localStorage.setItem('guest_pastes', JSON.stringify(guestPastes));
+      }
+      
       navigate('/explore');
     } catch (err: any) {
       setError(err.message || 'An unknown error occurred');
@@ -113,7 +120,11 @@ export default function Home() {
             disabled={isSubmitting}
           >
             <option value="public">Public</option>
-            <option value="unlisted">Unlisted</option>
+            {user ? (
+              <option value="unlisted">Unlisted</option>
+            ) : (
+              <option value="unlisted" disabled>Unlisted (Login required)</option>
+            )}
           </select>
         </div>
 

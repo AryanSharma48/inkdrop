@@ -39,6 +39,25 @@ export default function AuthCallback({ onLogin }: AuthCallbackProps) {
         const data = await response.json();
         setToken(data.token);
         setUser(data.user);
+        
+        // Sync any locally stored guest pastes to the user's account
+        const guestPastes = JSON.parse(localStorage.getItem('guest_pastes') || '[]');
+        if (guestPastes.length > 0) {
+          try {
+            await fetch(`${import.meta.env.VITE_API_URL}/api/pastes/sync`, {
+              method: 'POST',
+              headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${data.token}`
+              },
+              body: JSON.stringify({ pasteIds: guestPastes })
+            });
+            localStorage.removeItem('guest_pastes');
+          } catch (syncErr) {
+            console.error('Failed to sync guest pastes:', syncErr);
+          }
+        }
+
         onLogin(data.user);
         
         // Redirect to homepage/dashboard

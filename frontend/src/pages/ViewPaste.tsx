@@ -2,9 +2,11 @@ import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { getAuthHeaders, getUser } from '../utils/auth';
 
 type PasteData = {
     id: string;
+    userId?: string | null;
     title?: string | null;
     text: string;
     language?: string;
@@ -24,6 +26,7 @@ export default function ViewPaste() {
   const [isLocked, setIsLocked] = useState(false);
   const [password, setPassword] = useState('');
   const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [isTitleExpanded, setIsTitleExpanded] = useState(false);
 
   const fetchPaste = async (pass?: string) => {
       try {
@@ -63,7 +66,9 @@ export default function ViewPaste() {
     setIsDeleting(true);
     try {
         const response = await fetch(`${import.meta.env.VITE_API_URL}/api/pastes/${id}`, {
-            method: 'DELETE'
+            method: 'DELETE',
+            headers: {
+              ...getAuthHeaders()}
         });
         if (!response.ok) {
             throw new Error("Failed to delete paste.");
@@ -124,10 +129,16 @@ export default function ViewPaste() {
   };
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end border-b-4 border-gov-black pb-4 gap-4">
-        <div>
-          <h1 className="text-3xl sm:text-4xl font-black uppercase truncate max-w-full">
+    <div className="flex flex-col gap-4 max-w-full overflow-hidden">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end border-b-4 border-gov-black pb-4 gap-4 w-full min-w-0">
+        <div className="min-w-0 w-full">
+          <h1 
+            onClick={() => setIsTitleExpanded(!isTitleExpanded)}
+            title={isTitleExpanded ? "Click to collapse" : "Click to expand"}
+            className={`text-3xl sm:text-4xl font-black uppercase cursor-pointer select-none ${
+              isTitleExpanded ? "whitespace-normal break-all" : "truncate max-w-full"
+            }`}
+          >
             {paste.title ? paste.title : `PASTE: ${id}`}
           </h1>
           {paste.isBurn && (
@@ -154,17 +165,20 @@ export default function ViewPaste() {
           >
             Raw
           </a>
-          <button 
-            onClick={handleDelete}
-            disabled={isDeleting}
-            className="flex-1 sm:flex-initial bg-gov-red text-gov-white font-bold px-4 py-2 uppercase border-2 border-gov-black hover:bg-gov-black disabled:opacity-50 text-center"
-          >
-            Delete
-          </button>
+          {((getUser() && paste.userId === getUser()?.id) ||
+            (JSON.parse(localStorage.getItem('guest_pastes') || '[]').includes(paste.id))) && (
+            <button 
+              onClick={handleDelete}
+              disabled={isDeleting}
+              className="flex-1 sm:flex-initial bg-gov-red text-gov-white font-bold px-4 py-2 uppercase border-2 border-gov-black hover:bg-gov-black disabled:opacity-50 text-center"
+            >
+              Delete
+            </button>
+          )}
         </div>
       </div>
 
-      <div className="border-4 border-gov-black bg-gov-black overflow-hidden mt-4">
+      <div className="border-4 border-gov-black bg-gov-black overflow-x-auto mt-4 max-w-full">
         {/* We override the syntax highlighter pre styling to ensure brutalism */}
         <SyntaxHighlighter 
           language={paste.language || 'text'} 

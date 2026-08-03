@@ -36,7 +36,7 @@ function App() {
 
   return (
     <BrowserRouter>
-      <div className="min-h-screen flex flex-col bg-gov-white">
+      <div className="min-h-screen flex flex-col bg-gov-white overflow-x-hidden w-full">
         {/* Header */}
         <header className="bg-gov-yellow border-b-4 border-gov-black p-4 shadow-[0_4px_0_0_rgba(0,0,0,1)]">
           <div className="max-w-4xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
@@ -53,12 +53,12 @@ function App() {
               <Link to="/explore" className="text-gov-black font-black uppercase text-lg hover:underline decoration-4 underline-offset-4">
                 EXPLORE
               </Link>
+              <Link to="/dashboard" className="text-gov-black font-black uppercase text-lg hover:underline decoration-4 underline-offset-4">
+                MY PASTES
+              </Link>
               
               {user ? (
                 <>
-                  <Link to="/dashboard" className="text-gov-black font-black uppercase text-lg hover:underline decoration-4 underline-offset-4">
-                    MY PASTES
-                  </Link>
                   <div className="flex items-center gap-2 border-2 border-gov-black px-2 py-1 bg-gov-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
                     <img src={user.avatarUrl} alt={user.userName} className="w-6 h-6 border border-gov-black object-cover" />
                     <span className="font-bold text-xs uppercase text-gov-black truncate max-w-[80px]">
@@ -101,8 +101,7 @@ function App() {
         {/* Footer */}
         <footer className="bg-gov-black text-gov-white p-4 mt-8 border-t-4 border-gov-black shadow-[0_-4px_0_0_rgba(0,0,0,1)]">
           <div className="max-w-4xl mx-auto text-sm font-bold uppercase flex justify-between items-center">
-            <span>INKDROP SYSTEM // {new Date().getFullYear()}</span>
-            <span className="text-gov-yellow">SECURE TRANSFER MODE</span>
+            <span>INKDROP '{(new Date().getFullYear()) % 2000 }</span>
           </div>
         </footer>
       </div>
