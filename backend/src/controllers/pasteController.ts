@@ -18,6 +18,14 @@ export async function addPasteData (c : Context) {
     }
     const payload = c.get('jwtPayload') as { sub: string; username?: string } | undefined;
     const { title, language, visibility, text, expiresIn, isBurn, password }  = result.data;
+
+    if (visibility === 'unlisted' && !payload?.sub) {
+        return c.json({
+            error: {
+                visibility: ["Only registered users can create unlisted pastes."]
+            }
+        }, 400);
+    }
     const pasteData : PasteType = {
         id: id,
         userId: payload?.sub ?? null,
@@ -68,7 +76,7 @@ export async function getPasteData (c : Context) {
         return c.json({ error: 'Failed to fetch data from storage' }, 500)
     } 
     
-    if(pastedContent.expiresAt < Date.now()){
+    if(pastedContent.expiresAt && pastedContent.expiresAt < Date.now()){
         await deleteFromDB(c.env, pasteId);
         return c.json({
             error: "This paste had been expired."
@@ -99,12 +107,26 @@ export async function getPasteData (c : Context) {
 
 export async function deletePasteData(c: Context) {
     const id = c.req.param('id') as string;
+    const payload = c.get('jwtPayload') as { sub: string } | undefined;
+    
     try {
+        const pasteRaw = await getFromDB(c.env, id);
+        if (!pasteRaw) {
+            return c.json({ error: "Paste not found" }, 404);
+        }
+        
+        const paste = JSON.parse(pasteRaw) as PasteType;
+        
+        // If the paste is owned by a user, ensure the requester is the owner
+        if (paste.userId && paste.userId !== payload?.sub) {
+            return c.json({ error: "Unauthorized. Only the owner can delete this paste." }, 403);
+        }
+        
         await deleteFromDB(c.env, id);
-        return c.json({ success: true});
-    } catch (error: unknown){
+        return c.json({ success: true });
+    } catch (error: unknown) {
         console.error("Error in deletion: ", error);
-        return c.text("Failed to delete data", 500);
+        return c.json({ error: "Failed to delete data" }, 500);
     }
 }
 
@@ -119,7 +141,7 @@ export async function getRawPasteData(c: Context){
     const parsedPaste = JSON.parse(paste);
     const text = parsedPaste.text;
 
-    if(parsedPaste.expiresAt < Date.now()){
+    if(parsedPaste.expiresAt && parsedPaste.expiresAt < Date.now()){
         await deleteFromDB(c.env, id);
         return c.text("This paste has been expired.", 410);
     }
@@ -186,5 +208,37 @@ export async function getMyPastes(c: Context) {
         const message = error instanceof Error ? error.message : 'Unknown error'
         console.error(`Failed to fetch user pastes:`, message);
         return c.json({ error: 'Failed to fetch pastes from storage' }, 500)
+    }
+}
+
+export async function syncPastes(c: Context) {
+    const payload = c.get('jwtPayload') as { sub: string } | undefined;
+    if (!payload) {
+        return c.json({ error: 'Unauthorized' }, 401);
+    }
+    
+    try {
+        const { pasteIds } = await c.req.json<{ pasteIds: string[] }>();
+        if (!Array.isArray(pasteIds)) {
+            return c.json({ error: 'Invalid payload: pasteIds must be an array' }, 400);
+        }
+        
+        for (const id of pasteIds) {
+            const result = await c.env.ink_drop_db.prepare(
+                `UPDATE pastes SET userId = ? WHERE id = ? AND userId IS NULL`
+            ).bind(payload.sub, id).run();
+            
+            // Invalidate the KV cache so the view paste route re-fetches the updated owner info from D1
+            if (result.meta.changes > 0) {
+                await c.env.PASTE_KV.delete(id);
+            }
+        }
+        
+        return c.json({ success: true }, 200);
+        
+    } catch(error : unknown){
+        const message = error instanceof Error ? error.message : 'Unknown error'
+        console.error(`Failed to sync pastes:`, message);
+        return c.json({ error: 'Failed to sync pastes' }, 500);
     }
 }

@@ -1,6 +1,6 @@
 import { Hono } from 'hono'
 
-import { addPasteData, deletePasteData, getAllPastes, getPasteData, getRawPasteData, getMyPastes } from '../controllers/pasteController.js';
+import { addPasteData, deletePasteData, getAllPastes, getPasteData, getRawPasteData, getMyPastes, syncPastes } from '../controllers/pasteController.js';
 import { optionalAuth, requireAuth } from '../middleware/auth.js';
 
 type Bindings = {
@@ -10,10 +10,11 @@ type Bindings = {
 const app = new Hono<{ Bindings : Bindings}>();
 
 app.post('/pastes', optionalAuth, addPasteData);
+app.post('/pastes/sync', requireAuth, syncPastes);
 app.get('/pastes', getAllPastes);
 app.get('/my-pastes', requireAuth, getMyPastes);
 app.get('/pastes/:id', getPasteData);
-app.delete('/pastes/:id', deletePasteData);
+app.delete('/pastes/:id', optionalAuth, deletePasteData);
 app.get('/raw/:id', getRawPasteData);
 
 export const pasteRouter = app;
