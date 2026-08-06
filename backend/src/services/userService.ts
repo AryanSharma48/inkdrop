@@ -3,41 +3,47 @@ import { randomUrl } from '../utils/id.js'
  
 export async function upsertUser(
     env: any, 
-    githubUser: { id: number; login: string; avatar_url: string }
+    provider: string,
+    providerId: string,
+    userName: string,
+    avatarUrl: string
 ): Promise<UserType> {
 
-    const userData = (await env.ink_drop_db.prepare(`SELECT * FROM users WHERE githubId = ?`)
-        .bind(githubUser.id.toString())
+    const userData = (await env.ink_drop_db.prepare(`SELECT * FROM users WHERE provider = ? AND providerId = ?`)
+        .bind(provider, providerId)
         .first()) as UserType | null;
     
     if (userData) {
-        await env.ink_drop_db.prepare(`UPDATE users SET userName = ?, avatarUrl = ? WHERE githubId = ?`).bind(
-            githubUser.login,
-            githubUser.avatar_url,
-            githubUser.id.toString()
+        await env.ink_drop_db.prepare(`UPDATE users SET userName = ?, avatarUrl = ? WHERE provider = ? AND providerId = ?`).bind(
+            userName,
+            avatarUrl,
+            provider,
+            providerId
         ).run();
         
         return {
             ...userData,
-            userName: githubUser.login,
-            avatarUrl: githubUser.avatar_url
+            userName: userName,
+            avatarUrl: avatarUrl
         };
     } else {
         const id = randomUrl();
         const createdAt = Date.now();
-        await env.ink_drop_db.prepare(`INSERT INTO users (id, githubId, userName, avatarUrl, createdAt) VALUES (?, ?, ?, ?, ?)`).bind(
+        await env.ink_drop_db.prepare(`INSERT INTO users (id, provider, providerId, userName, avatarUrl, createdAt) VALUES (?, ?, ?, ?, ?, ?)`).bind(
             id, 
-            githubUser.id.toString(),
-            githubUser.login,
-            githubUser.avatar_url,
+            provider,
+            providerId,
+            userName,
+            avatarUrl,
             createdAt
         ).run();
 
         return {
             id,
-            githubId: githubUser.id.toString(),
-            userName: githubUser.login,
-            avatarUrl: githubUser.avatar_url,
+            provider,
+            providerId,
+            userName,
+            avatarUrl,
             createdAt
         };
     }

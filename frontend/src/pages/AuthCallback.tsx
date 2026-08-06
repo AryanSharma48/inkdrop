@@ -15,6 +15,7 @@ export default function AuthCallback({ onLogin }: AuthCallbackProps) {
 
   useEffect(() => {
     const code = searchParams.get('code');
+    const state = searchParams.get('state');
     if (!code) {
       setError('No authorization code received.');
       return;
@@ -25,10 +26,19 @@ export default function AuthCallback({ onLogin }: AuthCallbackProps) {
 
     const exchangeCode = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/auth`, {
+        const isGoogle = state === 'google';
+        const authEndpoint = isGoogle
+          ? `${import.meta.env.VITE_API_URL}/api/auth/google`
+          : `${import.meta.env.VITE_API_URL}/api/auth/github`;
+
+        const payload = isGoogle
+          ? { code, redirectUri: `${window.location.origin}/auth/callback` }
+          : { code };
+
+        const response = await fetch(authEndpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ code })
+          body: JSON.stringify(payload)
         });
 
         if (!response.ok) {
@@ -88,7 +98,7 @@ export default function AuthCallback({ onLogin }: AuthCallbackProps) {
           <div>
             <h2 className="text-2xl font-black text-gov-black uppercase mb-4 animate-pulse">VERIFYING SECURE TOKEN...</h2>
             <div className="border-4 border-gov-black p-4 bg-gov-yellow flex items-center justify-center font-black text-xl uppercase">
-              Connecting with GitHub...
+              Connecting with {searchParams.get('state') === 'google' ? 'Google' : 'GitHub'}...
             </div>
           </div>
         )}

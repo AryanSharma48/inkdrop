@@ -13,7 +13,8 @@ export interface PasteType {
 
 export interface UserType {
     id: string;
-    githubId: string;
+    provider: string;
+    providerId: string;
     userName: string;
     avatarUrl: string;
     createdAt: number;

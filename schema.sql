@@ -12,8 +12,10 @@ CREATE TABLE IF NOT EXISTS pastes (
 
 CREATE TABLE IF NOT EXISTS users (
   id TEXT PRIMARY KEY,
-  githubId TEXT NOT NULL,
+  provider TEXT NOT NULL,
+  providerId TEXT NOT NULL,
   userName TEXT NOT NULL,
   avatarUrl TEXT NOT NULL,
-  createdAt INTEGER
+  createdAt INTEGER,
+  UNIQUE(provider, providerId)
 );
