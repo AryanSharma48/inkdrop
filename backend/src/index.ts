@@ -12,4 +12,10 @@ app.use('/api/*', cors({
 app.route('/api', pasteRouter);
 app.route('/api/auth', authRouter);
 
+app.get('/health', (c) => {
+    return c.json({
+        status: "ok",
+    }, 200);
+})
+
 export default app;

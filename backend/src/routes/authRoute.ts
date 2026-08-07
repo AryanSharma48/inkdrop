@@ -7,6 +7,8 @@ type Bindings = {
     GITHUB_CLIENT_SECRET: string,
     GOOGLE_CLIENT_ID: string,
     GOOGLE_CLIENT_SECRET: string,
+    UPSTASH_REDIS_REST_URL: string,
+    UPSTASH_REDIS_REST_TOKEN: string,
     JWT_SECRET: string
 }
 
