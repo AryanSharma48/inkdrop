@@ -8,6 +8,7 @@ export default function Home() {
   const [language, setLanguage] = useState('text');
   const [visibility, setVisibility] = useState('public');
   const [expiration, setExpiration] = useState('never');
+  const [customDateTime, setCustomDateTime] = useState('');
   const [isBurn, setIsBurn] = useState(false);
   const [password, setPassword] = useState('');
   const [title, setTitle] = useState('');
@@ -26,6 +27,22 @@ export default function Home() {
     if (expiration === '1h') expiresIn = 3600;
     else if (expiration === '1d') expiresIn = 86400;
     else if (expiration === '1w') expiresIn = 604800;
+    else if (expiration === 'custom') {
+      if (customDateTime) {
+        const diffInMs = new Date(customDateTime).getTime() - Date.now();
+        if (diffInMs > 0) {
+          expiresIn = Math.floor(diffInMs / 1000);
+        } else {
+          setError("Custom expiration time must be in the future.");
+          setIsSubmitting(false);
+          return;
+        }
+      } else {
+        setError("Please select a custom expiration date and time.");
+        setIsSubmitting(false);
+        return;
+      }
+    }
 
     try {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/pastes`, {
@@ -108,10 +125,11 @@ export default function Home() {
             <option value="text">Plain Text</option>
             <option value="javascript">JavaScript</option>
             <option value="python">Python</option>
+            <option value="java">Java</option>
+            <option value="c">C</option>
+            <option value="cpp">C++</option>
             <option value="json">JSON</option>
             <option value="sql">SQL</option>
-            <option value="html">HTML</option>
-            <option value="css">CSS</option>
           </select>
         </div>
 
@@ -132,19 +150,33 @@ export default function Home() {
           </select>
         </div>
 
-        <div className="flex flex-col border-4 border-gov-black">
+        <div className={`flex flex-col border-4 border-gov-black ${expiration === 'custom' ? 'md:col-span-2' : ''}`}>
           <label className="font-bold uppercase bg-gov-black text-gov-white px-2 py-1 text-sm">Expiration</label>
-          <select 
-            value={expiration} 
-            onChange={(e) => setExpiration(e.target.value)}
-            className="p-2 font-bold uppercase bg-gov-white text-gov-black focus:outline-none appearance-none"
-            disabled={isSubmitting}
-          >
-            <option value="never">Never</option>
-            <option value="1h">1 Hour</option>
-            <option value="1d">1 Day</option>
-            <option value="1w">1 Week</option>
-          </select>
+          <div className="flex flex-col sm:flex-row bg-gov-white h-full">
+            <select 
+              value={expiration} 
+              onChange={(e) => setExpiration(e.target.value)}
+              className="p-2 font-bold uppercase bg-transparent text-gov-black focus:outline-none appearance-none flex-1"
+              disabled={isSubmitting}
+            >
+              <option value="never">Never</option>
+              <option value="1h">1 Hour</option>
+              <option value="1d">1 Day</option>
+              <option value="1w">1 Week</option>
+              <option value="custom">Custom</option>
+            </select>
+            {expiration === 'custom' && (
+              <div className="flex items-center border-t-4 sm:border-t-0 sm:border-l-4 border-gov-black bg-gov-white flex-1">
+                <input 
+                  type="datetime-local"
+                  value={customDateTime}
+                  onChange={(e) => setCustomDateTime(e.target.value)}
+                  className="w-full p-2 font-bold bg-transparent text-gov-black focus:outline-none text-xs uppercase"
+                  disabled={isSubmitting}
+                />
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="flex flex-col border-4 border-gov-black">
