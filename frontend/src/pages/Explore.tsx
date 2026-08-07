@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 type FeedPaste = {
     id: string;
@@ -12,6 +12,7 @@ type FeedPaste = {
 };
 
 export default function Explore() {
+    const navigate = useNavigate();
     const [pastes, setPastes] = useState<FeedPaste[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -21,6 +22,10 @@ export default function Explore() {
             try {
                 const response = await fetch(`${import.meta.env.VITE_API_URL}/api/pastes`);
                 if (!response.ok) {
+                    if (response.status === 429) {
+                        navigate('/error?code=429&message=Too+Many+Requests');
+                        return;
+                    }
                     throw new Error("Failed to fetch feed.");
                 }
                 const data = await response.json();

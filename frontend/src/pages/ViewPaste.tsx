@@ -36,6 +36,10 @@ export default function ViewPaste() {
 
           const response = await fetch(`${import.meta.env.VITE_API_URL}/api/pastes/${id}`, { headers });
           if (!response.ok) {
+              if (response.status === 429) {
+                  navigate('/error?code=429&message=Too+Many+Requests');
+                  return;
+              }
               if (response.status === 404) throw new Error("Paste not found.");
               if (response.status === 410) throw new Error("This paste has expired.");
               if (response.status === 401) {

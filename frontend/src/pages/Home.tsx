@@ -46,6 +46,10 @@ export default function Home() {
       });
 
       if (!response.ok) {
+        if (response.status === 429) {
+          navigate('/error?code=429&message=Too+Many+Requests');
+          return;
+        }
         const errData = await response.json();
         throw new Error(errData.error || 'Failed to create paste');
       }

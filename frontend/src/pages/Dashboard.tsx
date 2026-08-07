@@ -33,6 +33,10 @@ export default function Dashboard() {
         });
 
         if (!response.ok) {
+          if (response.status === 429) {
+            navigate('/error?code=429&message=Too+Many+Requests');
+            return;
+          }
           if (response.status === 401) {
             throw new Error('Your session has expired. Please log in again.');
           }

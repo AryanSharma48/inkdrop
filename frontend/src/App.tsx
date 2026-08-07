@@ -5,6 +5,7 @@ import ViewPaste from './pages/ViewPaste';
 import Explore from './pages/Explore';
 import AuthCallback from './pages/AuthCallback';
 import Dashboard from './pages/Dashboard';
+import ErrorPage from './pages/ErrorPage';
 import { getUser, clearSession } from './utils/auth';
 import type { User } from './utils/auth';
 
@@ -112,6 +113,8 @@ function App() {
             <Route path="/auth/callback" element={<AuthCallback onLogin={setUser} />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/p/:id" element={<ViewPaste />} />
+            <Route path="/error" element={<ErrorPage />} />
+            <Route path="*" element={<ErrorPage />} />
           </Routes>
         </main>
 
