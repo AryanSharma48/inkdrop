@@ -2,102 +2,76 @@
   <img src="./frontend/public/logo.png" alt="InkDrop Logo" width="30" style="vertical-align: middle;" /> InkDrop
 </h1>
 
-A modern, serverless Pastebin platform built for developers to create, store, and share text snippets using unique URLs.
-
-## Project Vision
-
-InkDrop is a lightweight text-sharing platform similar to Pastebin or GitHub Gist. It allows users to quickly share source code, configuration files, error logs, JSON, SQL queries, Markdown, plain text, and API responses without creating an account.
-
-Every uploaded snippet receives a unique URL that can be shared with anyone.
+InkDrop is an enterprise-grade, serverless snippet sharing platform built for developers. It offers a secure, high-performance environment to store, manage, and share code, logs, and text using unique URLs.
 
 ## Features
 
-### Current (MVP)
-- **Paste Management:** Create, view, and delete pastes. Includes raw paste view and copy functionality.
-- **Paste Options:** Set title, language selection, visibility (public/unlisted), and expiration (never, 1 hour, 1 day, 1 week).
-- **Display:** Syntax highlighting, line numbers, and a responsive layout.
+### Core Platform
+- **Instant Snippet Sharing:** Create, view, and delete pastes instantly without account friction.
+- **Rich Text Support:** Native syntax highlighting for JavaScript, Python, SQL, HTML, CSS, JSON, and Plain Text.
+- **Granular Access Control:** Toggle pastes between Public, Unlisted, or securely Password-Protected.
+- **Automated Expirations:** Set TTLs (Time-To-Live) for 1 hour, 1 day, 1 week, or Never.
+- **Burn-After-Reading:** High-security self-destructing pastes that vanish permanently after one view.
+- **User Dashboard:** Login via GitHub or Google to manage and delete personal snippets.
 
-### Planned Features
-- Burn After Reading
-- Password Protected Pastes
-- Markdown Preview
-- Authentication and Dashboard
-- Public REST API and Rate Limiting
-- Analytics and Monitoring
+### Advanced Backend Systems
+- **Adaptive Rate Limiting (Edge):** Protected by Upstash Redis sliding-window algorithms at the Cloudflare Edge to prevent API abuse (strict creation limits, generous read limits).
+- **Automated Garbage Collection:** Cloudflare Cron Triggers periodically sweep and purge expired database records.
+- **Edge Caching (SWR):** Read-heavy requests are served with sub-10ms latency using Cloudflare KV.
+- **OAuth Identity Management:** Secure, sessionless GitHub and Google authentication flows.
+
+### Future Scope
+- **Zero-Knowledge Encryption (E2EE):** AES-GCM client-side encryption where the server never sees the plaintext.
+- **Custom Vanity URLs:** Developer-friendly custom endpoints.
+- **Developer API & CLI:** Native terminal piping support (`cat error.log | inkdrop`).
+- **Cloudflare R2 Object Storage:** Signed URL uploads for attaching images and files to pastes.
 
 ## Technology Stack
 
-### Frontend
-- **Framework:** React with Vite
-- **Language:** TypeScript
-- **Styling:** TailwindCSS
-- **Components:** shadcn/ui
-- **Routing:** React Router
+**Frontend**
+- React 19 + Vite (TypeScript)
+- TailwindCSS v4 (Brutalist "Government" UI Design)
+- React Router DOM
 
-### Backend
-- **Runtime:** Cloudflare Workers
-- **Framework:** Hono
-- **Language:** TypeScript
-- **Validation:** Zod
+**Backend (Serverless)**
+- Cloudflare Workers (Edge Compute)
+- Hono (Web Framework)
+- Upstash Redis (Rate Limiting)
 
-### Database & Storage
-- **Database:** Cloudflare D1 (Stores pastes and metadata)
-- **Cache:** Cloudflare KV (Stores frequently accessed pastes and cached metadata)
+**Database & Storage**
+- Cloudflare D1 (Serverless SQLite)
+- Cloudflare KV (Low-latency Edge Cache)
 
-## Architecture Overview
+## Architecture & Data Flow
 
-InkDrop utilizes a modern serverless architecture hosted on Cloudflare. The React frontend communicates via HTTP REST requests to the Hono API running on Cloudflare Workers. 
-
-To ensure low latency and high performance, the backend leverages Cloudflare KV to cache frequent requests, reducing the load on the Cloudflare D1 SQL database.
-
-## Frontend UI
-
-The frontend is a strictly brutalist, "Government Website" themed React application. 
-- Features stark, flat colors (solid blue, dark grey, black) with strict zero border-radius elements.
-- Built using Vite, React, and Tailwind CSS v4.
-- Syntax highlighting is handled cleanly on the client-side using `react-syntax-highlighter` mapping to the backend's saved language tokens.
-
-## System Workflow 
+InkDrop operates on a globally distributed serverless architecture, ensuring zero cold starts and immense scalability.
 
 ```mermaid
 graph TD
     Client([Client / Browser])
     
-    Frontend[React / Vite UI]
+    Frontend[React UI / Pages]
     API[Hono API / CF Workers]
+    RateLimit[Upstash Redis Limiter]
     KV[(Cloudflare KV Cache)]
-    D1[(Cloudflare D1 SQL DB)]
+    D1[(D1 SQLite Database)]
 
-    Routes["<b>REST API</b><br/>POST /api/pastes<br/>GET /api/pastes/:id<br/>GET /api/raw/:id<br/>DELETE /api/pastes/:id"]
+    Routes["<b>REST API</b><br/>POST /api/pastes<br/>GET /api/pastes/:id<br/>GET /api/my-pastes"]
     
     Client --> Frontend
     Frontend --> Routes
-    Routes --> API
+    Routes --> RateLimit
+    RateLimit -- "Allowed" --> API
     
     API <-->|1. Sub-10ms Cache Hit| KV
     API <-->|2. DB Fallback / Write| D1
     API -->|3. Populate Cache| KV
 ```
 
-### Creating a Paste
-1. User submits paste content via the Frontend.
-2. Backend validates input and generates a unique ID using NanoID.
-3. The new paste is stored in Cloudflare D1.
-4. The paste data is cached in Cloudflare KV for quick subsequent access.
-5. A shareable URL is returned to the user.
-
-### Viewing a Paste
-1. User visits the unique paste URL.
-2. Backend checks Cloudflare KV cache for the paste.
-3. If not found in cache, it falls back to querying Cloudflare D1.
-4. If expired, the paste is deleted and an expiration message is returned.
-5. If valid, the result is cached and returned to the user.
-
 ## Local Development Setup
 
 ### Prerequisites
-- Node.js
-- npm
+- Node.js & npm
 - Cloudflare Wrangler CLI
 
 ### Getting Started
@@ -113,42 +87,21 @@ graph TD
    npm install
    ```
 
-3. Run the development server:
+3. Run the development server (Starts Wrangler & Vite):
    ```bash
    npm run dev
-   ```
-   This will start the Wrangler local development server.
-
-4. Build the project:
-   ```bash
-   npm run build
    ```
 
 ## Project Structure
 
 ```text
 inkdrop/
-├── frontend/        # React application source code
-├── backend/         # Hono API source code
-├── docs/            # Project documentation and PRD
-├── schema.sql       # Database schema definition
-├── wrangler.toml    # Cloudflare Workers configuration
-└── package.json     # Project dependencies and scripts
-```
-
-## Database Schema
-
-The initial database schema consists of a `pastes` table tracking the snippet details, language, visibility, and expiration.
-
-```sql
-CREATE TABLE IF NOT EXISTS pastes (
-  id TEXT PRIMARY KEY,
-  title TEXT,
-  language TEXT,
-  visibility TEXT NOT NULL,
-  text TEXT NOT NULL,
-  expiresAt INTEGER
-);
+├── frontend/        # React application (Vite)
+├── backend/         # Hono API & Middleware (CF Workers)
+├── docs/            # Architecture PRDs
+├── schema.sql       # D1 Database Schema
+├── wrangler.toml    # Infrastructure as Code config
+└── package.json     # Monorepo dependencies
 ```
 
 ## License
