@@ -13,6 +13,9 @@ binding = "ink_drop_db"
 database_name = "ink-drop-db"
 database_id = "e8cefe08-3663-42f8-877b-afb599554534"
 
+[triggers]
+crons = ["0 * * * *"]
+
 [build]
 command = "npm run build"         # runs `tsc` → outputs to ./dist
 cwd = "."

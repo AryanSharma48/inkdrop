@@ -18,4 +18,15 @@ app.get('/health', (c) => {
     }, 200);
 })
 
-export default app;
+export default {
+    fetch: app.fetch,
+
+    async scheduled(event: any, env: any, ctx: any){
+        console.log("Running garbage collection..");
+        const now = Date.now();
+
+        await env.ink_drop_db.prepare(`DELETE FROM pastes WHERE expiresAt < ?`).bind(now).run();
+
+        console.log("Garbage collection complete");
+    }
+}
