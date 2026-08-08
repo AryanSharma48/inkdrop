@@ -138,6 +138,11 @@ Frontend displays syntax-highlighted content
 
 ## Version 1 (MVP)
 
+### Explore Page
+
+- Browse Recent Public Pastes
+- Search Public Pastes
+
 ### Paste Management
 
 - Create Paste
