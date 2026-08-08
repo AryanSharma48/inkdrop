@@ -4,7 +4,7 @@
     // File Layout
     // "rootDir": "./src",
     "outDir": "./dist",
-    "rootDir":"./backend/src",
+    "rootDir":"./src",
     // Environment Settings
     // See also https://aka.ms/tsconfig/module
     "module": "NodeNext",
@@ -43,6 +43,6 @@
     "moduleDetection": "force",
     "skipLibCheck": true,
   },
-  "include": ["backend/src/**/*"],
-  "exclude": ["node_modules", "frontend", "dist"]
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
 }

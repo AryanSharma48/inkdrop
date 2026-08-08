@@ -17,8 +17,19 @@ jobs:
             - name: checkout ink-drop
               uses: actions/checkout@v4
 
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                node-version: '20'
+
+            - name: Install backend dependencies
+              working-directory: ./backend
+              run: npm ci
+
+
             - name: Deploy to Cloudflare workers
               uses: cloudflare/wrangler-action@v3
               with:
                 apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
                 workingDirectory: backend
+                command: deploy
